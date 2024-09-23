@@ -3,6 +3,7 @@ package com.bootmicro.cards.controller;
 import com.bootmicro.cards.constants.CardsConstants;
 import com.bootmicro.cards.dto.CardsDto;
 import com.bootmicro.cards.dto.ResponseDto;
+import com.bootmicro.cards.entity.Cards;
 import com.bootmicro.cards.service.ICardServices;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,14 +28,26 @@ public class CardsController {
 
 
     @GetMapping(value = "/fetch")
-    public ResponseEntity<ResponseDto> fetchCard(@RequestParam String mobileNumber){
-
-        return ResponseEntity.status(HttpStatus.FOUND).body(new ResponseDto(CardsConstants.STATUS_200, CardsConstants.MESSAGE_200));
+    public ResponseEntity<CardsDto> fetchCard(@RequestParam String mobileNumber){
+        CardsDto cardsDto = cardServices.fetchCards(mobileNumber);
+        return ResponseEntity.status(HttpStatus.FOUND).body(cardsDto);
     }
 
     @PutMapping(value = "/update")
     public ResponseEntity<ResponseDto> updateCard(@RequestBody CardsDto cardsDto){
+        if(cardServices.updateCard(cardsDto)){
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto(CardsConstants.STATUS_200, CardsConstants.MESSAGE_200));
+        }else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ResponseDto(CardsConstants.STATUS_417, CardsConstants.MESSAGE_417_UPDATE));
+        }
+    }
 
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto(CardsConstants.STATUS_200, CardsConstants.MESSAGE_200));
+    @DeleteMapping(value = "/delete")
+    public ResponseEntity<ResponseDto> deleteCard(@RequestParam String mobileNumber){
+        if(cardServices.deleteCard(mobileNumber)){
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto(CardsConstants.STATUS_200, CardsConstants.MESSAGE_200));
+        }else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ResponseDto(CardsConstants.STATUS_500, CardsConstants.MESSAGE_500));
+        }
     }
 }
